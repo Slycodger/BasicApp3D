@@ -134,5 +134,8 @@
     <ClInclude Include="scripts\soundLoading.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="scripts\Camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

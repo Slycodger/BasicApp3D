@@ -51,8 +51,9 @@ int main() {
 		update();
 		glfwSwapBuffers(mainWindow);
 
-		if (_hideMouse)
-			glfwSetInputMode(mainWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        if (_hideMouse) {
+            glfwSetInputMode(mainWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        }
 		else
 			glfwSetInputMode(mainWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
@@ -82,5 +83,10 @@ static int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevIns
 //Class operators
 std::ostream& operator <<(std::ostream& stream, const Vec2& val) {
     stream << val.x << ", " << val.y;
+    return stream;
+}
+
+std::ostream& operator <<(std::ostream& stream, const Vec3& val) {
+    stream << val.x << ", " << val.y << ", " << val.z;
     return stream;
 }

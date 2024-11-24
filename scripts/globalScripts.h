@@ -17,7 +17,7 @@ struct TextBox : public scriptBase {
 	float yStart = 1;
 	float margin = 0;
 	uint mode = 0;
-	Vec4 fontColor = 1;
+    Vec4 fontColor = { 0, 0, 0, 1 };
 
     std::pair<std::vector<std::string>, std::vector<void*>&> objsNeeded() override {
         return std::pair<std::vector<std::string>, std::vector<void*>&>(std::vector<std::string> { }, startObjs);
@@ -36,9 +36,10 @@ struct TextBox : public scriptBase {
             return;
         started = true;
         thisObj = (Object*)vThisObj;
+        thisObj->UI = true;
 
 		thisObj->setTexture(texture);
-		createTextTexture(texture, fontSize, lineSize, thisObj->transform.scale, yStart, margin, mode, font, text);
+		createTextTexture(texture, fontSize, lineSize, thisObj->transform.scale.toVec2(), yStart, margin, mode, font, text);
 	}
 
 	void update() override {
@@ -54,7 +55,7 @@ struct TextBox : public scriptBase {
 	}
 
 	void textUpdate() {
-		createTextTexture(texture, fontSize, lineSize, thisObj->transform.scale, yStart, margin, mode, font, text);
+		createTextTexture(texture, fontSize, lineSize, thisObj->transform.scale.toVec2(), yStart, margin, mode, font, text);
 	}
 
     TextBox* operator =(const TextBox& val) {
@@ -103,6 +104,7 @@ struct ButtonMain : public scriptBase {
         started = true;
 
         thisObj = (Object*)vThisObj;
+        thisObj->UI = true;
 
 		textScr = new TextBox();
 
@@ -113,11 +115,11 @@ struct ButtonMain : public scriptBase {
 		textScr->lineSize = 0.55;
 		textScr->mode = TEXT_CENTER_RENDER;
 		textScr->fontColor = Vec4(0, 0, 0, 1);
-
+        textObj->UI = true;
 
 		textObj->transform = thisObj->transform;
         textObj->setParent(thisObj);
-        textObj->setRelativeDepth(0.05f);
+        textObj->relativeTransform.position.z = 0.05f;
         textObj->setToRelative();
 
         addObjScript(textObj, textScr);
@@ -132,6 +134,9 @@ struct ButtonMain : public scriptBase {
 				onReleased();
 			return;
 		}
+
+        if (_hideMouse)
+            return;
 
 		if (keyAction::keyPressed(GLFW_MOUSE_BUTTON_1)) {
 			if (mouseWithin(thisObj)) {
@@ -198,6 +203,7 @@ struct Button : public scriptBase {
         started = true;
 
         thisObj = (Object*)vThisObj;
+        thisObj->UI = true;
 
 		textScr = new TextBox();
 
@@ -208,11 +214,11 @@ struct Button : public scriptBase {
 		textScr->lineSize = 0.55;
 		textScr->mode = TEXT_CENTER_RENDER;
 		textScr->fontColor = Vec4(0, 0, 0, 1);
-
+        textObj->UI = true;
 
 		textObj->transform = thisObj->transform;
         textObj->setParent(thisObj);
-        textObj->setRelativeDepth(0.05f);
+        textObj->relativeTransform.position.z = 0.05f;
 
 		addObjScript(textObj, textScr);
 	}
@@ -227,6 +233,9 @@ struct Button : public scriptBase {
                 BonReleased(this);
 			return;
 		}
+
+        if (_hideMouse)
+            return;
 
 		float left = thisObj->transform.position.x - thisObj->transform.scale.x;
 		float right = thisObj->transform.position.x + thisObj->transform.scale.x;
@@ -293,6 +302,7 @@ struct VoidButton : public scriptBase {
         started = true;
 
         thisObj = (Object*)vThisObj;
+        thisObj->UI = true;
 
         textScr = new TextBox();
 
@@ -303,11 +313,11 @@ struct VoidButton : public scriptBase {
 		textScr->lineSize = 0.55;
 		textScr->mode = TEXT_CENTER_RENDER;
 		textScr->fontColor = Vec4(0, 0, 0, 1);
-
+        textObj->UI = true;
 
 		textObj->transform = thisObj->transform;
 		textObj->setParent(thisObj);
-        textObj->setRelativeDepth(0.05f);
+        textObj->relativeTransform.position.z = 0.05f;
         textObj->setToRelative();
 
         addObjScript(textObj, textScr);
@@ -321,6 +331,9 @@ struct VoidButton : public scriptBase {
 				onReleased(releaseVal);
 			return;
 		}
+
+        if (_hideMouse)
+            return;
 
 		float left = thisObj->transform.position.x - thisObj->transform.scale.x;
 		float right = thisObj->transform.position.x + thisObj->transform.scale.x;
@@ -359,6 +372,8 @@ struct VoidButton : public scriptBase {
 			heldDelete(heldVal);
 		if (releaseDelete)
 			releaseDelete(releaseVal);
+
+        deleteObj(textObj);
 	}
 
 
@@ -395,6 +410,9 @@ struct TextField : public ButtonMain {
 	}
 
 	void cUpdate() override {
+        if (_hideMouse)
+            return;
+
 		giveKeyAction::setIgnore(false);
 		if (keyAction::keyPressed(GLFW_KEY_ESCAPE)) {
 			insideOf = false;
@@ -469,15 +487,20 @@ struct DropDownFieldDynamic : public ButtonMain {
         background = (Object*)startObjs[1];
         background->transform.position = thisObj->transform.position;
         background->transform.position.y -= thisObj->transform.scale.y;
-        background->transform.scale = { thisObj->transform.scale.x, 0 };
-        background->setDepth(thisObj->getDepth() + 0.05f);
-        background->color = Vec4{ 0.7, 0.7, 0.7, 1 };
+        background->transform.scale = { thisObj->transform.scale.x, 0, 1 };
+        background->color = Vec4{ 0.4, 0.7, 0.7, 1 };
         background->setParent(thisObj);
-
+        background->relativeTransform.position.z = 0.05f;
+        background->UI = true;
+        background->setToRelative();
         onPressed();
 	}
 
     void cUpdate() override {
+        if (_hideMouse)
+            return;
+
+
         if (keyAction::keyPressed(0) && background->active && !ButtonMain::mouseWithin(background) && !ButtonMain::mouseWithin(thisObj))
             onPressed();
 
@@ -500,6 +523,8 @@ struct DropDownFieldDynamic : public ButtonMain {
         Object* newOption = createObj("square");
         VoidButton* newScr = new VoidButton;
 
+        newOption->UI = true;
+
         void dynamicDropDownFunction(void*);
         newScr->onPressed = dynamicDropDownFunction;
         newScr->pressVal = (void*)new std::pair<DropDownFieldDynamic*, std::string>(this, option);
@@ -507,9 +532,11 @@ struct DropDownFieldDynamic : public ButtonMain {
         newScr->pressDelete = dynamicDropDownDelete;
 
         newOption->transform.position = background->transform.position;
-        newOption->transform.scale = { thisObj->transform.scale.x, optionHeight };
-        newOption->setDepth(background->getDepth() + 0.05f);
+        newOption->transform.scale = { thisObj->transform.scale.x, optionHeight, 1 };
         newOption->setParent(background);
+        newOption->relativeTransform.position.z = 0.1f;
+        newOption->setToRelative();
+        newOption->color = 1;
         addObjScript(newOption, newScr);
         *newScr->textScr = buttonText;
         newScr->textScr->text = option;
@@ -586,15 +613,19 @@ struct DropDownFieldStatic : public ButtonMain {
         background = (Object*)startObjs[1];
         background->transform.position = thisObj->transform.position;
         background->transform.position.y -= thisObj->transform.scale.y + height;
-        background->transform.scale = { thisObj->transform.scale.x, height };
+        background->transform.scale = { thisObj->transform.scale.x, height, 1 };
         background->setParent(thisObj);
         background->setToRelative();
         background->color = Vec4{ 0.7, 0.7, 0.7, 1 };
+        background->UI = true;
 
         onPressed();
     }
 
     void cUpdate() override {
+        if (_hideMouse)
+            return;
+
         if (keyAction::scrollUp() && objOffset > 0)
             objOffset -= scrollSpeed;
         if (keyAction::scrollDown() && objOffset < optionObjs.size() * (2 * optionHeight + optionOffset))
@@ -622,17 +653,18 @@ struct DropDownFieldStatic : public ButtonMain {
         void staticDropDownDelete(void* val);
         newScr->pressDelete = staticDropDownDelete;
 
-        newOption->transform.position = { thisObj->transform.position.x, thisObj->transform.position.y };
-        newOption->transform.scale = { thisObj->transform.scale.x, optionHeight };
+        newOption->transform.position = { thisObj->transform.position.x, thisObj->transform.position.y, 1 };
+        newOption->transform.scale = { thisObj->transform.scale.x, optionHeight, 1 };
         newOption->setParent(background);
         newOption->setDependent(background);
-        newOption->setRelativeDepth(0.05f);
+        newOption->relativeTransform.position.z = 0.05f;
         newOption->setToRelative();
         addObjScript(newOption, newScr);
         newScr->textObj->setDependent(background);
         *newScr->textScr = buttonText;
         newScr->textScr->text = option;
         newScr->textScr->textUpdate();
+        newOption->UI = true;
 
         optionObjs.push_back(newOption);
     }

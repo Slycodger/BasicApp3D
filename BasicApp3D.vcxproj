@@ -177,6 +177,7 @@ xcopy $(ProjectDir)*.dll $(OutDir) /y</Command>
     <None Include="shaders\TVertexShader.vert" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="scripts\Camera.h" />
     <ClInclude Include="scripts\GlobalScripts.h" />
     <ClInclude Include="scripts\ObjScripts.h" />
     <ClInclude Include="scripts\Constants.h" />

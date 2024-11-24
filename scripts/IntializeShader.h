@@ -54,6 +54,9 @@ struct Shader {
 	void setMat4(std::string name, glm::mat4& Mat) {
 		glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, false, glm::value_ptr(Mat));
 	}
+    void setMat4(std::string name, const float*& Mat) {
+        glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, false, Mat);
+    }
 
 	static uint createShader(std::string vertexLoc, std::string fragmentLoc) {
 

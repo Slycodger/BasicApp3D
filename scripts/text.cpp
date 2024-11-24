@@ -18,6 +18,7 @@ static uint VAO, VBO, EBO;
 
 Shader shader;
 
+extern const float* _identityMatrix;
 
 /// <summary>
 /// Load a font into a map with some size
@@ -203,6 +204,7 @@ void createTextTexture(uint& texture, float fontSize, float lineSize, Vec2 size,
 	shader.active();
 	shader.setInt("texTarget", 0);
 	shader.setMat4("projection", ortho);
+	shader.setMat4("view", _identityMatrix);
 
     glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 	glDeleteTextures(1, &texture);

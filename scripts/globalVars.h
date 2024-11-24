@@ -16,3 +16,4 @@ extern bool _closeApp;
 extern bool _lockMouse;
 extern bool _hideMouse;
 extern bool _vsync;
+extern bool _showUI;

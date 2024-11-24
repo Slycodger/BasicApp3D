@@ -16,6 +16,8 @@ bool _lockMouse = false;
 float _mousePosX = 0;
 float _mousePosY = 0;
 
+extern Camera MainCamera;
+
 
 //Local globals
 
@@ -25,8 +27,8 @@ void start() {
 		globalObjects[i] = nullptr;
 	}
 
-    Text::start();
     Objects::start();
+    Text::start();
     ProgUI::start();
     Sound::start();
 
@@ -83,8 +85,9 @@ void windowScaleCallback(GLFWwindow* window, int width, int height) {
 	_Height = height;
 	_screenRatio = (float)_Width / _Height;
 	glViewport(0, 0, width, height);
-    changeProjectionToOrtho(_screenRatio, -1.0f, 1.0f);
 	_windowScaled = true;
+    MainCamera.setOrthographicView(_screenRatio, 1, 1);
+    MainCamera.setPerspectiveView(MainCamera.FOV, _screenRatio, MainCamera.nearClip, MainCamera.farClip);
 }
 void windowMoveCallback(GLFWwindow* window, int xpos, int ypos) {
 	_windowPos.x = xpos;

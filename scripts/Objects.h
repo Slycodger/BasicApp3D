@@ -23,7 +23,7 @@ namespace Objects {
 #include "Shapes.h"
 #include <iostream>
 #include "MathConstants.h"
-#include <type_traits>
+#include "Camera.h"
 
 struct ObjectBase {
 	int index = -1;
@@ -32,15 +32,13 @@ struct ObjectBase {
 	uint *EBO = nullptr;
 	uint *triCount = nullptr;
 	std::vector<void*> scripts;
-	float depth = 0;
-	float relativeDepth = 0;
-	ObjectBase() : index(-1), texTarget(nullptr), VBO(nullptr), EBO(nullptr), triCount(nullptr), scripts(), depth(0), relativeDepth(0) {}
+	ObjectBase() : index(-1), texTarget(nullptr), VBO(nullptr), EBO(nullptr), triCount(nullptr), scripts() {}
 };
 
 struct Transform {
-	Vec2 position = 0;
-	Vec2 scale = 1;
-	float rotation = 0;
+	Vec3 position = 0;
+	Vec3 scale = 1;
+	Vec3 rotation = 0;
 
 	Transform() : position(0), scale(1), rotation(0) {}
 };
@@ -53,10 +51,11 @@ struct Object : private ObjectBase {
     Object* dependent = nullptr;
 	Object* parent = nullptr;
 	Vec4 color = 1;
-	bool weak = false;
 	bool active = true;
     std::string objType;
     bool scriptCreated = false;
+    bool UI = false;
+    bool weak = false;
     
 
     Object& operator=(Object* obj) {
@@ -77,9 +76,9 @@ struct Object : private ObjectBase {
         }
 
         this->color = obj->color;
-        this->weak = obj->weak;
         this->active = obj->active;
         this->objType = obj->objType;
+        this->active = obj->active;
 
         ObjectBase* base = (ObjectBase*)this;
         ObjectBase* objBase = (ObjectBase*)obj;
@@ -88,8 +87,6 @@ struct Object : private ObjectBase {
         base->VBO = objBase->VBO;
         base->EBO = objBase->EBO;
         base->triCount = objBase->triCount;
-        base->depth = objBase->depth;
-        base->relativeDepth = objBase->relativeDepth;
 
         return *this;
     }
@@ -98,7 +95,7 @@ struct Object : private ObjectBase {
 	//-------------------Constructor
     //-------------------Destructor
 
-	Object() : transform(), relativeTransform(), children(), dependencies(), parent(nullptr), color(1), weak(false), active(true), scriptCreated(false) {}
+	Object() : transform(), relativeTransform(), children(), dependencies(), parent(nullptr), color(1), active(true), scriptCreated(false), UI(false) {}
     ~Object() {}
 
 	//--------------------------getter functions
@@ -117,12 +114,6 @@ struct Object : private ObjectBase {
 	}
 	uint getTexture() {
 		return *texTarget;
-	}
-	float getDepth() {
-		return depth;
-	}
-	float getRelativeDepth() {
-		return relativeDepth;
 	}
     
     template <typename T>
@@ -143,18 +134,6 @@ struct Object : private ObjectBase {
 	void removeTexture() {
 		texTarget = nullptr;
 	}
-	void setDepth(float nDepth) {
-		depth = nDepth;
-	}
-	void setRelativeDepth(float nDepth) {
-		relativeDepth = nDepth;
-	}
-	void addDepth(float nDepth) {
-		depth += nDepth;
-	}
-	void addRelativeDepth(float nDepth) {
-		relativeDepth += nDepth;
-	}
 	
 
 	//-------------------------Parenting functions
@@ -162,27 +141,30 @@ struct Object : private ObjectBase {
 	void setParent(Object* obj) {
 		if (parent != nullptr)
 			parent->children.erase(this);
+
         obj->children.insert(this);
 		parent = obj;
-		relativeTransform.position = (transform.position - parent->transform.position) / parent->transform.scale;
+        this->UI = parent->UI;
+        relativeTransform.position = (transform.position - parent->transform.position) / parent->transform.scale;
 		relativeTransform.scale = transform.scale / parent->transform.scale;
 		relativeTransform.rotation = transform.rotation - parent->transform.rotation;
-		relativeDepth = depth - parent->depth;
 	}
+
 	void setToRelative() {
 		if (parent == nullptr)
 			return;
-		float angle = parent->transform.rotation + relativeTransform.rotation;
-		transform.scale = relativeTransform.scale * parent->transform.scale;
 
-		transform.position.x = relativeTransform.position.x * parent->transform.scale.x * cos(angle * degToRad) - relativeTransform.position.y * parent->transform.scale.y * sin(angle * degToRad);
-		transform.position.y = relativeTransform.position.y * parent->transform.scale.y * cos(angle * degToRad) + relativeTransform.position.x * parent->transform.scale.x * sin(angle * degToRad);
+        this->UI = parent->UI;
 
-		transform.position += parent->transform.position;
+        glm::mat4 Translation(1);
+        Translation = glm::rotate(Translation, glm::radians<float>(parent->transform.rotation.x), glm::vec3(1, 0, 0));
+        Translation = glm::rotate(Translation, glm::radians<float>(parent->transform.rotation.y), glm::vec3(0, 1, 0));
+        Translation = glm::rotate(Translation, glm::radians<float>(parent->transform.rotation.z), glm::vec3(0, 0, 1));
+        Translation = glm::translate(Translation, (relativeTransform.position * parent->transform.scale + parent->transform.position).toGLM());
 
-
-		transform.rotation = angle;
-		depth = relativeDepth + parent->depth;
+        transform.position = Translation * glm::vec4(0, 0, 0, 1);
+        transform.rotation = parent->transform.rotation;
+        transform.scale = parent->transform.scale * relativeTransform.scale;
 	}
 	void removeParent() {
 		if (parent == nullptr)
@@ -242,13 +224,10 @@ void clearObjChildren(Object*& obj);
 void deleteObj(Object*& obj);
 void deleteObj(Object*& obj, int);
 void deleteAll();
-bool objCmp(const ObjectBase* obj1, const ObjectBase* obj2);
 void drawObjStencil(Object* obj);
 void drawAllObjs();
 uint findObjSlot();
 bool addGlobalObj(ObjectBase*& obj);
-void changeProjectionToOrtho(float width, float near, float depth);
-void changeProjectionToPerp(float FOV, float near, float depth);
 Object* createObj();
 Object* instantiateObj(std::string objName);
 bool saveObj(Object* obj, std::string objName);
@@ -256,6 +235,7 @@ void addObjScript(Object* obj, void* script, char c);
 void deleteObj(Object*& obj, const char);
 void startObject(Object* obj);
 void createScriptObjs(std::pair<std::vector<std::string>, std::vector<void*>&> pair);
+glm::mat4 createObjTransform(Object* obj);
 
 extern ObjectBase* globalObjects[];
 extern uint objCount;

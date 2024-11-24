@@ -26,6 +26,14 @@ Object* obj1Child = nullptr;
 Object* obj2 = nullptr;
 Button* obj1Button = nullptr;
 
+Object* cube = nullptr;
+Object* cube1 = nullptr;
+Object* cube2 = nullptr;
+
+float rotationSpeed = 20;
+
+extern Camera MainCamera;
+
 void onPressed(Button* button) {
     offset = { button->thisObj->transform.position.x - _mousePosX, button->thisObj->transform.position.y - _mousePosY };
 }
@@ -40,9 +48,27 @@ void progStart() {
 
     setBgColor(0.2, 0.3, 0.3, 0);
 
+    cube = createObj("cube");
+    cube->transform.scale = { 0.5, 0.5, 0.5 };
+    cube->transform.position = { 1, 0, -2 };
+    cube->transform.rotation = { 0, 0, 0 };
+    cube->color = {0.2, 0.8, 0.3, 1};
+
+    cube1 = createObj("cube");
+    cube1->transform.scale = { 0.5, 0.5, 0.5 };
+    cube1->transform.position = { 1, 0, -4 };
+    cube1->transform.rotation = { 0, 0, 0 };
+    cube1->color = { 0.8, 0.2, 0.3, 1 };
+
+    cube2 = createObj("cube");
+    cube2->transform.scale = { 0.5, 0.5, 0.5 };
+    cube2->transform.position = { 1, 0, -6 };
+    cube2->transform.rotation = { 0, 0, 0 };
+    cube2->color = { 0.2, 0.3, 1, 1 };
+
     button = createObj("square");
-    button->transform.scale = 0.5;
-    button->setDepth(0.05f);
+    button->transform.scale = { 0.5, 0.5, 1 };
+    button->UI = true;
     buttonScr = new Button;
 
     int iWidth, iHeight = 0;
@@ -66,10 +92,11 @@ void progStart() {
     buttonScr->textScr->text = "Drag to move";
     buttonScr->textScr->textUpdate();
 
+
     dropDownFieldObj = createObj("square");
 
-    dropDownFieldObj->transform.scale = { 0.3, 0.2 };
-    dropDownFieldObj->transform.position = { -_screenRatio + 0.3f, 1 - 0.2f };
+    dropDownFieldObj->transform.scale = { 0.3, 0.2, 1 };
+    dropDownFieldObj->transform.position = { -_screenRatio + 0.3f, 1 - 0.2f, 0 };
 
     dropDownScr = new DropDownFieldDynamic;
 
@@ -79,10 +106,10 @@ void progStart() {
     dropDownScr->buttonText.lineSize = 0.31f;
 
     addObjScript(dropDownFieldObj, dropDownScr);
+
     dropDownScr->textScr->text = "Yes or No";
     dropDownScr->textScr->textUpdate();
     dropDownScr->addOption("Option hey there");
-    dropDownScr->optionObjs[0]->active = true;
     dropDownScr->addOption("Yes");
     dropDownScr->addOption("No");
     dropDownScr->addOption("No");
@@ -118,8 +145,8 @@ void progStart() {
     obj1Button = new Button;
 
     addObjScript(obj1, obj1Button);
-    obj1->transform.scale = { 0.2, 0.2 };
-    obj1Child->transform.scale = { 0.1, 0.1 };
+    obj1->transform.scale = { 0.2, 0.2, 1 };
+    obj1Child->transform.scale = { 0.1, 0.1, 1 };
     obj1Child->transform.position.y += 0.4;
     obj1Child->setParent(obj1);
     
@@ -167,6 +194,24 @@ void progMain() {
     if (keyAction::keyPressed(GLFW_KEY_KP_2))
         if (musicLoaded(musicIndex))
             stopMusic(musicIndex);
+
+    if (keyAction::keyHeld(GLFW_KEY_W))
+        MainCamera.position += MainCamera.directionFacing() * 0.5f * _deltaTime;
+
+    if (keyAction::keyHeld(GLFW_KEY_Q))
+        MainCamera.addRotation(0, -90 * _deltaTime, 0);
+    if (keyAction::keyHeld(GLFW_KEY_E))
+        MainCamera.addRotation(0, 90 * _deltaTime, 0);
+
+    if (_hideMouse) {
+        MainCamera.setRotation(-_mousePosY * rotationSpeed, _mousePosX  * rotationSpeed, 0);
+    }
+
+    if (keyAction::keyPressed(GLFW_KEY_T))
+        _hideMouse = !_hideMouse;
+
+    if (keyAction::keyPressed(GLFW_KEY_Y))
+        _showUI = !_showUI;
 }
 
 void progEnd() {

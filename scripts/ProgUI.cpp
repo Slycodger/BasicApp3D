@@ -9,9 +9,9 @@ namespace ProgUI {
         UIFPSObj = createObj("square");
         UIFPSScr = new TextBox;
 
-        UIFPSObj->transform.scale = { 0.3, 0.075 };
-        UIFPSObj->transform.position = { _screenRatio - UIFPSObj->transform.scale.x, 1 - UIFPSObj->transform.scale.y };
-        UIFPSObj->setDepth(0.85f);
+        UIFPSObj->transform.scale = { 0.3, 0.075, 1 };
+        UIFPSObj->transform.position = { _screenRatio - UIFPSObj->transform.scale.x, 1 - UIFPSObj->transform.scale.y, 1 };
+        UIFPSObj->transform.position.z = 0.85f;
 
         UIFPSScr->text = "FPS : ";
         UIFPSScr->font = "CascadiaCode_BIG";

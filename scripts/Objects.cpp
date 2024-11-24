@@ -8,30 +8,44 @@ static std::map<std::string, Object*> savedObjs;
 
 unsigned int squareVBO, squareEBO, squareTriCount;
 unsigned int triangleVBO, triangleEBO, triangleTriCount;
+unsigned int cubeVBO, cubeEBO, cubeTriCount;
 
 uint objCount = 0;
 ObjectBase* globalObjects[_MAX_OBJECTS];
 
 static glm::mat4 _transform(1);
-static glm::mat4 _view(1);
-static glm::mat4 _projection(1);
+
+Camera MainCamera = Camera(0, 0, 70, 0.01f, 100.f);
 
 static Shader shader;
 static uint VAO;
 
+const float* _identityMatrix = nullptr;
+
+bool _showUI = true;
+
 namespace Objects {
 	//Creates default objects
-	void start() {
-		createBufferObj(squareVBO, squareEBO, squareVertices, squareIndices, sizeof(squareVertices), sizeof(squareIndices));
-		squareTriCount = 6;
-		loadBufferObj("square", &squareVBO, &squareEBO, &squareTriCount);
+    void start() {
+        createBufferObj(squareVBO, squareEBO, squareVertices, squareIndices, sizeof(squareVertices), sizeof(squareIndices));
+        squareTriCount = 2;
+        loadBufferObj("square", &squareVBO, &squareEBO, &squareTriCount);
 
         createBufferObj(triangleVBO, triangleEBO, triangleVertices, triangleIndices, sizeof(triangleVertices), sizeof(triangleIndices));
-        triangleTriCount = 3;
+        triangleTriCount = 1;
         loadBufferObj("triangle", &triangleVBO, &triangleEBO, &triangleTriCount);
 
-        _projection = glm::ortho(-_screenRatio, _screenRatio, -1.0f, 1.0f, -1.0f, 1.0f);
-	}
+        createBufferObj(cubeVBO, cubeEBO, cubeVertices, cubeIndices, sizeof(cubeVertices), sizeof(cubeIndices));
+        cubeTriCount = 12;
+        loadBufferObj("cube", &cubeVBO, &cubeEBO, &cubeTriCount);
+
+        //_projection = glm::perspective(90.f, _screenRatio, -50.f, 50.f);
+
+        MainCamera.setPerspectiveView(70, _screenRatio, 0.01f, 100.f);
+        MainCamera.setOrthographicView(_screenRatio, 1, 1);
+
+        _identityMatrix = new float [16] { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
+    }
 
 	//Deletes at the end
 	void end() {
@@ -47,16 +61,8 @@ namespace Objects {
             deleteObj(savedObj.second, 'c');
         }
         savedObjs.clear();
+        delete[](_identityMatrix);
 	}
-}
-
-void changeProjectionToPerp(float FOV, float near, float depth) {
-    float ratio = cos(FOV * degToRad);
-    _projection = glm::perspective(FOV, ratio, near, depth);
-}
-
-void changeProjectionToOrtho(float width, float near, float depth) {
-    _projection = glm::ortho(-width, width, -1.0f, 1.0f, near, depth);
 }
 
 
@@ -200,7 +206,7 @@ void deleteObj(Object*& obj, const char) {
 void deleteObj(Object*& obj) {
     if (obj == nullptr)
         return;
-    uint index = obj->getIndex();
+    int index = obj->getIndex();
     clearObjScripts(obj);
     clearObjChildren(obj);
     obj->removeParent();
@@ -329,30 +335,30 @@ void updateObjChildren(Object*& obj) {
     }
 }
 
-bool objCmp(const ObjectBase* obj1, const ObjectBase* obj2) {
-    if (obj1 == nullptr && obj2 == nullptr)
-        return false;
-    if (obj1 != nullptr && obj2 == nullptr)
-        return true;
-    if (obj1 == nullptr && obj2 != nullptr)
-        return false;
-    if (obj1->depth == obj2->depth)
-        return false;
-    return obj1->depth < obj2->depth;
+glm::mat4 createObjTransform(Object* obj) {
+    
+    glm::mat4 ret = glm::mat4(1);
+    ret = glm::translate(ret, obj->transform.position.toGLM());
+    ret = glm::rotate(ret, (float)degToRad * obj->transform.rotation.x, glm::vec3(1, 0, 0));
+    ret = glm::rotate(ret, (float)degToRad * obj->transform.rotation.y, glm::vec3(0, 1, 0));
+    ret = glm::rotate(ret, (float)degToRad * obj->transform.rotation.z, glm::vec3(0, 0, 1));
+    ret = glm::scale(ret, obj->transform.scale.toGLM());
+
+    return ret;
 }
-
-
 
 
 
 //---------------------OBJECT-DRAWING
 
+
 void drawAllObjs() {
     if (objCount == 0)
         return;
+    MainCamera.setViewMatrix();
+
 
     uint objDrawn = 0;
-    std::sort(globalObjects, globalObjects + _MAX_OBJECTS, objCmp);
     Object* prevDependent = nullptr;
 
     for (int i = 0; i < _MAX_OBJECTS; i++) {
@@ -364,6 +370,9 @@ void drawAllObjs() {
         ObjectBase*& objBase = globalObjects[i];
         objBase->index = i;
         Object*& obj = (Object*&)objBase;
+
+        if (obj->UI && !_showUI)
+            continue;
 
         if (!Object::chainActive(obj)) {
             objDrawn++;
@@ -396,16 +405,20 @@ void drawAllObjs() {
             glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
         }
 
-        _transform = glm::mat4(1);
-        _transform = glm::translate(_transform, glm::vec3(obj->transform.position.toGLM(), objBase->depth));
-        _transform = glm::rotate(_transform, (float)degToRad * obj->transform.rotation, glm::vec3(0, 0, 1));
-        _transform = glm::scale(_transform, glm::vec3(obj->transform.scale.toGLM(), 1));
+        _transform = createObjTransform(obj);
         if (obj->usesTexture()) {
             uint texTarget = obj->getTexture();
             shader.use(getShader("textureShader"));
+            if (!obj->UI) {
+                shader.setMat4("view", MainCamera.viewMatrix);
+                shader.setMat4("projection", MainCamera.perspectiveView);
+            }
+            else {
+                shader.setMat4("projection", MainCamera.orthographicView);
+                shader.setMat4("view", _identityMatrix);
+            }
+
             shader.setMat4("transform", _transform);
-            shader.setMat4("view", _view);
-            shader.setMat4("projection", _projection);
             shader.setVec4("color", obj->color);
             shader.setInt("texTarget", 0);
             glActiveTexture(GL_TEXTURE0);
@@ -413,9 +426,16 @@ void drawAllObjs() {
         }
         else {
             shader.use(getShader("noTextureShader"));
+            if (!obj->UI) {
+                shader.setMat4("view", MainCamera.viewMatrix);
+                shader.setMat4("projection", MainCamera.perspectiveView);
+            }
+            else {
+                shader.setMat4("projection", MainCamera.orthographicView);
+                shader.setMat4("view", _identityMatrix);
+            }
+
             shader.setMat4("transform", _transform);
-            shader.setMat4("view", _view);
-            shader.setMat4("projection", _projection);
             shader.setVec4("color", obj->color);
         }
 
@@ -428,7 +448,7 @@ void drawAllObjs() {
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
         glEnableVertexAttribArray(1);
 
-        glDrawElements(GL_TRIANGLES, *objBase->triCount, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, *objBase->triCount * 3, GL_UNSIGNED_INT, 0);
         objDrawn++;
     }
     glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -445,15 +465,18 @@ void drawObjStencil(Object* obj) {
 
     ObjectBase*& objBase = (ObjectBase*&)obj;
 
-    _transform = glm::mat4(1);
-    _transform = glm::translate(_transform, glm::vec3(obj->transform.position.toGLM(), objBase->depth));
-    _transform = glm::rotate(_transform, (float)degToRad * obj->transform.rotation, glm::vec3(0, 0, 1));
-    _transform = glm::scale(_transform, glm::vec3(obj->transform.scale.toGLM(), 1));
+    _transform = createObjTransform(obj);
 
     shader.use(getShader("noTextureShader"));
     shader.setMat4("transform", _transform);
-    shader.setMat4("view", _view);
-    shader.setMat4("projection", _projection);
+    if (!obj->UI) {
+        shader.setMat4("view", MainCamera.viewMatrix);
+        shader.setMat4("projection", MainCamera.perspectiveView);
+    }
+    else {
+        shader.setMat4("projection", MainCamera.orthographicView);
+        shader.setMat4("view", _identityMatrix);
+    }
 
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, *objBase->VBO);
@@ -464,7 +487,7 @@ void drawObjStencil(Object* obj) {
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    glDrawElements(GL_TRIANGLES, *objBase->triCount, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, *objBase->triCount * 3, GL_UNSIGNED_INT, 0);
 
     glEnable(GL_DEPTH_TEST);
     glColorMask(1, 1, 1, 1);
