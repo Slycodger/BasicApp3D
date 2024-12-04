@@ -52,10 +52,10 @@
     <ClCompile Include="glad\src\glad.c">
       <Filter>Header Files</Filter>
     </ClCompile>
-    <ClCompile Include="scripts\textureLoading.cpp">
-      <Filter>Header Files</Filter>
-    </ClCompile>
     <ClCompile Include="scripts\sound.cpp">
+      <Filter>Script Files</Filter>
+    </ClCompile>
+    <ClCompile Include="scripts\textureLoading.cpp">
       <Filter>Script Files</Filter>
     </ClCompile>
   </ItemGroup>

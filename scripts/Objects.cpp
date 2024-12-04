@@ -94,7 +94,7 @@ Object* instantiateObj(std::string objName) {
 }
 
 //Creates the buffers for an object
-void createBufferObj(uint& VBO, uint& EBO, const float vertices[], const uint indices[], const size_t vertSize, const size_t indiceSize) {
+void createBufferObj(uint& VBO, uint& EBO, const float* vertices, const uint* indices, const size_t vertSize, const size_t indiceSize) {
 	glCreateBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, vertSize, vertices, GL_STATIC_DRAW);
@@ -339,9 +339,9 @@ glm::mat4 createObjTransform(Object* obj) {
     
     glm::mat4 ret = glm::mat4(1);
     ret = glm::translate(ret, obj->transform.position.toGLM());
-    ret = glm::rotate(ret, (float)degToRad * obj->transform.rotation.x, glm::vec3(1, 0, 0));
-    ret = glm::rotate(ret, (float)degToRad * obj->transform.rotation.y, glm::vec3(0, 1, 0));
-    ret = glm::rotate(ret, (float)degToRad * obj->transform.rotation.z, glm::vec3(0, 0, 1));
+    ret = glm::rotate(ret, (float)_degToRad * obj->transform.rotation.x, glm::vec3(1, 0, 0));
+    ret = glm::rotate(ret, (float)_degToRad * obj->transform.rotation.y, glm::vec3(0, 1, 0));
+    ret = glm::rotate(ret, (float)_degToRad * obj->transform.rotation.z, glm::vec3(0, 0, 1));
     ret = glm::scale(ret, obj->transform.scale.toGLM());
 
     return ret;

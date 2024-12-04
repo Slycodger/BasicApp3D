@@ -213,7 +213,7 @@ Object* createObj(std::string objName);
 bool unloadBufferObj(std::string name);
 bool loadBufferObj(std::string name, uint* VBO, uint* EBO, uint* triCount);
 void deleteObjMapping();
-void createBufferObj(uint& VBO, uint& EBO, const float vertices[], const uint indices[], const size_t vertSize, const size_t indiceSize);
+void createBufferObj(uint& VBO, uint& EBO, const float* vertices, const uint* indices, const size_t vertSize, const size_t indiceSize);
 void addObjScript(Object* obj, void* script);
 void removeObjScript(Object* obj, unsigned int index);
 unsigned int getObjScriptIndex(Object*& obj, std::string name);
