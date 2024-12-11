@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{c6b8f420-2218-47fd-9b75-e4eaa6e5b18d}</ProjectGuid>
-    <RootNamespace>BasicApp3D</RootNamespace>
+    <ProjectGuid>{C0802818-E68B-446C-AC39-34606C9A67DC}</ProjectGuid>
+    <RootNamespace>$safeprojectname$</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -71,9 +71,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)..\Builds\BasicApp3DBuilds\</OutDir>
-  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -108,16 +106,16 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.\glad\include;.\glm;.\glfw-3.4.bin.WIN64\include;.\freeTypeInclude;.\stb;.\sfml\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalUsingDirectories>.\glad\src;%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\glad\include;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies;$(SolutionDir)Dependencies\glfw-3.4.bin.WIN64\include;$(SolutionDir)Dependencies\freeTypeInclude;$(SolutionDir)Dependencies\stb;$(SolutionDir)Dependencies\sfml\include;$(SolutionDir)bap</AdditionalIncludeDirectories>
+      <AdditionalUsingDirectories>$(SolutionDir)\glad\src;%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <Optimization>Disabled</Optimization>
+      <Optimization>MaxSpeed</Optimization>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>.\lib-vc2022;.\freeTypeDLL;.\sfml\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\lib-vc2022;$(SolutionDir)Dependencies;$(SolutionDir)Dependencies\freeTypeDLL;$(SolutionDir)Dependencies\sfml\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>opengl32.lib;glfw3.lib;freetype.lib;sfml-audio-d.lib;sfml-system-d.lib;openal32.lib;flac.lib;vorbisenc.lib;vorbisfile.lib;vorbis.lib;ogg.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -129,8 +127,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.\glad\include;.\glm;.\glfw-3.4.bin.WIN64\include;.\freeTypeInclude;.\stb;.\sfml\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalUsingDirectories>.\glad\src;%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\glad\include;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies;$(SolutionDir)Dependencies\glfw-3.4.bin.WIN64\include;$(SolutionDir)Dependencies\freeTypeInclude;$(SolutionDir)Dependencies\stb;$(SolutionDir)Dependencies\sfml\include;$(SolutionDir)bap</AdditionalIncludeDirectories>
+      <AdditionalUsingDirectories>$(SolutionDir)\glad\src;%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -139,7 +137,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>opengl32.lib;glfw3.lib;freetype.lib;sfml-audio.lib;sfml-system.lib;openal32.lib;flac.lib;vorbisenc.lib;vorbisfile.lib;vorbis.lib;ogg.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>.\lib-vc2022;.\freeTypeDLL;.\sfml\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\lib-vc2022;$(SolutionDir)Dependencies;$(SolutionDir)Dependencies\freeTypeDLL;$(SolutionDir)Dependencies\sfml\lib</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -155,20 +153,26 @@ xcopy $(ProjectDir)*.dll $(OutDir) /y</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="glad\src\glad.c" />
-    <ClCompile Include="scripts\FlowControl.cpp" />
-    <ClCompile Include="scripts\GlobalScripts.cpp" />
-    <ClCompile Include="scripts\Input.cpp" />
-    <ClCompile Include="scripts\IntializeShader.cpp" />
-    <ClCompile Include="scripts\Main.cpp" />
-    <ClCompile Include="scripts\Objects.cpp" />
-    <ClCompile Include="scripts\ProgramControl.cpp" />
-    <ClCompile Include="scripts\ProgUI.cpp" />
-    <ClCompile Include="scripts\sound.cpp" />
-    <ClCompile Include="scripts\Text.cpp" />
-    <ClCompile Include="scripts\textureLoading.cpp" />
+    <ClCompile Include="bap\flowControl.cpp" />
+    <ClCompile Include="bap\globalScripts.cpp" />
+    <ClCompile Include="bap\input.cpp" />
+    <ClCompile Include="bap\IntializeShader.cpp" />
+    <ClCompile Include="bap\objects.cpp" />
+    <ClCompile Include="bap\programControl.cpp" />
+    <ClCompile Include="bap\progUI.cpp" />
+    <ClCompile Include="bap\sound.cpp" />
+    <ClCompile Include="bap\text.cpp" />
+    <ClCompile Include="bap\textureLoading.cpp" />
+    <ClCompile Include="Dependencies\glad\src\glad.c" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="LICENSE" />
+    <None Include="openal32.dll" />
+    <None Include="sfml-audio-2.dll" />
+    <None Include="sfml-audio-d-2.dll" />
+    <None Include="sfml-system-2.dll" />
+    <None Include="sfml-system-d-2.dll" />
     <None Include="shaders\NTFragmentShader.frag" />
     <None Include="shaders\NTVertexShader.vert" />
     <None Include="shaders\TextFragmentShader.frag" />
@@ -177,25 +181,35 @@ xcopy $(ProjectDir)*.dll $(OutDir) /y</Command>
     <None Include="shaders\TVertexShader.vert" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="scripts\Camera.h" />
-    <ClInclude Include="scripts\GlobalScripts.h" />
-    <ClInclude Include="scripts\ObjScripts.h" />
-    <ClInclude Include="scripts\Constants.h" />
-    <ClInclude Include="scripts\Objects.h" />
-    <ClInclude Include="scripts\FlowControl.h" />
-    <ClInclude Include="scripts\GlobalVars.h" />
-    <ClInclude Include="scripts\Input.h" />
-    <ClInclude Include="scripts\IntializeShader.h" />
-    <ClInclude Include="scripts\MathConstants.h" />
-    <ClInclude Include="scripts\OpenGL.h" />
-    <ClInclude Include="scripts\ProgramControl.h" />
-    <ClInclude Include="scripts\ProgUI.h" />
-    <ClInclude Include="scripts\Shapes.h" />
-    <ClInclude Include="scripts\soundLoading.h" />
-    <ClInclude Include="scripts\Text.h" />
-    <ClInclude Include="scripts\textureLoading.h" />
-    <ClInclude Include="scripts\TypeDefs.h" />
-    <ClInclude Include="scripts\Vector.h" />
+    <ClInclude Include="bap\camera.h" />
+    <ClInclude Include="bap\constants.h" />
+    <ClInclude Include="bap\flowControl.h" />
+    <ClInclude Include="bap\globalScripts.h" />
+    <ClInclude Include="bap\globalVars.h" />
+    <ClInclude Include="bap\input.h" />
+    <ClInclude Include="bap\intializeShader.h" />
+    <ClInclude Include="bap\mathConstants.h" />
+    <ClInclude Include="bap\objects.h" />
+    <ClInclude Include="bap\objScripts.h" />
+    <ClInclude Include="bap\openGL.h" />
+    <ClInclude Include="bap\programControl.h" />
+    <ClInclude Include="bap\progUI.h" />
+    <ClInclude Include="bap\shapes.h" />
+    <ClInclude Include="bap\soundLoading.h" />
+    <ClInclude Include="bap\text.h" />
+    <ClInclude Include="bap\textureLoading.h" />
+    <ClInclude Include="bap\typeDefs.h" />
+    <ClInclude Include="bap\vector.h" />
+    <ClInclude Include="Dependencies\freeTypeInclude\ft2build.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="fonts\Arial.ttf" />
+    <Font Include="fonts\CascadiaCode-ExtraLight.ttf" />
+    <Font Include="fonts\CascadiaCode-Light.ttf" />
+    <Font Include="fonts\CascadiaCode.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="FTL.TXT" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
