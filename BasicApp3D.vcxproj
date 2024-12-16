@@ -109,7 +109,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\glad\include;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies;$(SolutionDir)Dependencies\glfw-3.4.bin.WIN64\include;$(SolutionDir)Dependencies\freeTypeInclude;$(SolutionDir)Dependencies\stb;$(SolutionDir)Dependencies\sfml\include;$(SolutionDir)bap</AdditionalIncludeDirectories>
       <AdditionalUsingDirectories>$(SolutionDir)\glad\src;%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
     </ClCompile>
     <Link>

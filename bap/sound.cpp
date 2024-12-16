@@ -15,21 +15,21 @@ namespace Sound {
         for (int i = 0; i < 10; i++)
             musicQuery[i] = nullptr;
     }
-    void update() {
-        for (int i = 0; i < 246; i++)
-            if (soundQuery[i] != nullptr)
-                if (soundQuery[i]->getStatus() != sf::SoundSource::Status::Playing) {
-                    delete (soundQuery[i]);
-                    soundQuery[i] = nullptr;
-                }
+				void update() {
+								for (int i = 0; i < 246; i++)
+												if (soundQuery[i] != nullptr)
+																if (soundQuery[i]->getStatus() != sf::SoundSource::Status::Playing) {
+																				delete (soundQuery[i]);
+																				soundQuery[i] = nullptr;
+																}
 
-        for (int i = 0; i < 10; i++)
-            if (musicQuery[i] != nullptr)
-                if (musicQuery[i]->getStatus() == sf::SoundSource::Status::Stopped) {
-                    delete (musicQuery[i]);
-                    musicQuery[i] = nullptr;
-                }
-    }
+								for (int i = 0; i < 10; i++)
+												if (musicQuery[i] != nullptr)
+																if (musicQuery[i]->getStatus() == sf::SoundSource::Status::Stopped) {
+																				delete (musicQuery[i]);
+																				musicQuery[i] = nullptr;
+																}
+				}
 
     void end() {
         for (int i = 0; i < 246; i++) {
