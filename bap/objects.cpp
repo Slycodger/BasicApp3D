@@ -25,17 +25,28 @@ bool _showUI = true;
 namespace Objects {
 				//Creates default objects
 				void start() {
-								createMeshBuffers(squareVBO, squareEBO, squareVertices, squareIndices, sizeof(squareVertices), sizeof(squareIndices));
-								squareTriCount = 2;
-								loadMesh("square", new Mesh(&squareVBO, &squareEBO, &squareTriCount));
+								glGenVertexArrays(1, &VAO);
 
-								createMeshBuffers(triangleVBO, triangleEBO, triangleVertices, triangleIndices, sizeof(triangleVertices), sizeof(triangleIndices));
+
+								createMeshBuffers(triangleVBO, triangleEBO, triangleVertices, triangleIndices, triangleVerticeSize, triangleIndiceSize);
 								triangleTriCount = 1;
-								loadMesh("triangle", new Mesh(&triangleVBO, &triangleEBO, &triangleTriCount));
+								loadMesh(new Mesh({ reinterpret_cast<Vertex*>(triangleVertices), triangleVerticeSize / sizeof(float) },
+												{ triangleIndices, triangleIndiceSize / sizeof(unsigned int) },
+												&triangleVBO, &triangleEBO, &triangleTriCount), "triangle");
 
-								createMeshBuffers(cubeVBO, cubeEBO, cubeVertices, cubeIndices, sizeof(cubeVertices), sizeof(cubeIndices));
+
+								createMeshBuffers(squareVBO, squareEBO, squareVertices, squareIndices, squareVerticeSize, squareIndiceSize);
+								squareTriCount = 2;
+								loadMesh(new Mesh({ reinterpret_cast<Vertex*>(squareVertices), squareVerticeSize / sizeof(float) },
+												{ squareIndices, squareIndiceSize / sizeof(unsigned int) },
+												&squareVBO, &squareEBO, &squareTriCount), "square");
+
+
+								createMeshBuffers(cubeVBO, cubeEBO, cubeVertices, cubeIndices, cubeVerticeSize, cubeIndiceSize);
 								cubeTriCount = 12;
-								loadMesh("cube", new Mesh(&cubeVBO, &cubeEBO, &cubeTriCount));
+								loadMesh(new Mesh({ reinterpret_cast<Vertex*>(cubeVertices), cubeVerticeSize / sizeof(float) },
+												{ cubeIndices, cubeIndiceSize / sizeof(unsigned int) },
+												&cubeVBO, &cubeEBO, &cubeTriCount), "cube");
 
 
 								_mainCamera.setPerspectiveView(70, _screenRatio, 0.01f, 100.f);
@@ -86,13 +97,27 @@ Object* instantiateObj(std::string objName) {
 				for (Object* child : ret->children) {
 								addGlobalObj(child);
 				}
-				startObject(ret);
+				startObj(ret);
 
 				return ret;
 }
 
 //Creates the buffers for an object
-void createMeshBuffers(uint& VBO, uint& EBO, const float* vertices, const uint* indices, const size_t vertSize, const size_t indiceSize) {
+void createMeshBuffers(uint& VBO, uint& EBO, float* vertices, uint* indices, size_t vertSize, size_t indiceSize) {
+				glCreateBuffers(1, &VBO);
+				glBindBuffer(GL_ARRAY_BUFFER, VBO);
+				glBufferData(GL_ARRAY_BUFFER, vertSize, vertices, GL_STATIC_DRAW);
+
+				glCreateBuffers(1, &EBO);
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+				glBufferData(GL_ELEMENT_ARRAY_BUFFER, indiceSize, indices, GL_STATIC_DRAW);
+
+				glBindBuffer(GL_ARRAY_BUFFER, 0);
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+//Creates the buffers for an object
+void createMeshBuffers(uint& VBO, uint& EBO, const float* vertices, const uint* indices, size_t vertSize, size_t indiceSize) {
 				glCreateBuffers(1, &VBO);
 				glBindBuffer(GL_ARRAY_BUFFER, VBO);
 				glBufferData(GL_ARRAY_BUFFER, vertSize, vertices, GL_STATIC_DRAW);
@@ -106,7 +131,7 @@ void createMeshBuffers(uint& VBO, uint& EBO, const float* vertices, const uint* 
 }
 
 //Loads an object into a map
-bool loadMesh(std::string name, Mesh* mesh) {
+bool loadMesh(Mesh* mesh, std::string name) {
 				return objMeshes.insert({ name, mesh }).second;
 }
 
@@ -258,7 +283,7 @@ void deleteObj(Object*& obj, int) {
 //--------------------FOR-OBJECTS
 
 //Starts an objects scripts
-void startObject(Object* obj) {
+void startObj(Object* obj) {
 				for (auto scr : obj->scripts) {
 								if (!((scriptBase*)scr)->started) {
 												createScriptObjs(((scriptBase*)scr)->objsNeeded());
@@ -266,7 +291,7 @@ void startObject(Object* obj) {
 								}
 				}
 				for (auto child : obj->children) {
-								startObject(child);
+								startObj(child);
 				}
 }
 
@@ -372,6 +397,7 @@ void drawAllObjs() {
 				if (objCount == 0)
 								return;
 				_mainCamera.setViewMatrix();
+				glBindVertexArray(VAO);
 
 
 				uint objDrawn = 0;
@@ -387,7 +413,7 @@ void drawAllObjs() {
 								Object*& obj = globalObjects[i];
 								obj->index = i;
 
-								if (obj->UI || !obj->mesh)
+								if (obj->ui || !obj->mesh)
 												continue;
 
 								if (!Object::chainActive(obj)) {
@@ -425,14 +451,8 @@ void drawAllObjs() {
 								if (obj->texture) {
 												uint texTarget = *obj->texture;
 												shader.use(getShader("textureShader"));
-												if (!obj->UI) {
-																shader.setMat4("view", _mainCamera.viewMatrix);
-																shader.setMat4("projection", _mainCamera.perspectiveView);
-												}
-												else {
-																shader.setMat4("projection", _mainCamera.orthographicView);
-																shader.setMat4("view", _identityMatrix);
-												}
+												shader.setMat4("view", _mainCamera.viewMatrix);
+												shader.setMat4("projection", _mainCamera.perspectiveView);
 
 												shader.setMat4("transform", _transform);
 												shader.setVec4("color", obj->color);
@@ -442,29 +462,24 @@ void drawAllObjs() {
 								}
 								else {
 												shader.use(getShader("noTextureShader"));
-												if (!obj->UI) {
-																shader.setMat4("view", _mainCamera.viewMatrix);
-																shader.setMat4("projection", _mainCamera.perspectiveView);
-												}
-												else {
-																shader.setMat4("projection", _mainCamera.orthographicView);
-																shader.setMat4("view", _identityMatrix);
-												}
+												shader.setMat4("view", _mainCamera.viewMatrix);
+												shader.setMat4("projection", _mainCamera.perspectiveView);
 
 												shader.setMat4("transform", _transform);
 												shader.setVec4("color", obj->color);
 								}
 
-								glBindVertexArray(VAO);
 								glBindBuffer(GL_ARRAY_BUFFER, *obj->mesh->VBO);
 								glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *obj->mesh->EBO);
 
-								glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+								glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 								glEnableVertexAttribArray(0);
-								glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+								glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
 								glEnableVertexAttribArray(1);
+								glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+								glEnableVertexAttribArray(2);
 
-								glDrawElements(GL_TRIANGLES, *obj->mesh->triCount * 3, GL_UNSIGNED_INT, 0);
+								glDrawElements(GL_TRIANGLES, obj->mesh->indices.size(), GL_UNSIGNED_INT, 0);
 								objDrawn++;
 				}
 				glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -482,7 +497,7 @@ void drawAllObjs() {
 								Object*& obj = globalObjects[i];
 								obj->index = i;
 
-								if (!obj->UI || !obj->mesh)
+								if (!obj->ui || !obj->mesh)
 												continue;
 
 								if (!Object::chainActive(obj)) {
@@ -520,7 +535,7 @@ void drawAllObjs() {
 								if (obj->texture) {
 												uint texTarget = *obj->texture;
 												shader.use(getShader("textureShader"));
-												if (!obj->UI) {
+												if (!obj->ui) {
 																shader.setMat4("view", _mainCamera.viewMatrix);
 																shader.setMat4("projection", _mainCamera.perspectiveView);
 												}
@@ -537,7 +552,7 @@ void drawAllObjs() {
 								}
 								else {
 												shader.use(getShader("noTextureShader"));
-												if (!obj->UI) {
+												if (!obj->ui) {
 																shader.setMat4("view", _mainCamera.viewMatrix);
 																shader.setMat4("projection", _mainCamera.perspectiveView);
 												}
@@ -550,14 +565,15 @@ void drawAllObjs() {
 												shader.setVec4("color", obj->color);
 								}
 
-								glBindVertexArray(VAO);
 								glBindBuffer(GL_ARRAY_BUFFER, *obj->mesh->VBO);
 								glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *obj->mesh->EBO);
 
-								glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+								glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 								glEnableVertexAttribArray(0);
-								glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+								glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
 								glEnableVertexAttribArray(1);
+								glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+								glEnableVertexAttribArray(2);
 
 								glDrawElements(GL_TRIANGLES, *obj->mesh->triCount * 3, GL_UNSIGNED_INT, 0);
 								objDrawn++;
@@ -575,12 +591,13 @@ void drawObjStencil(Object* obj) {
 				glStencilOp(GL_INCR, GL_INCR, GL_INCR);
 				glDisable(GL_DEPTH_TEST);
 				glColorMask(0, 0, 0, 0);
+				glBindVertexArray(VAO);
 
 				_transform = createObjTransform(obj);
 
 				shader.use(getShader("noTextureShader"));
 				shader.setMat4("transform", _transform);
-				if (!obj->UI) {
+				if (!obj->ui) {
 								shader.setMat4("view", _mainCamera.viewMatrix);
 								shader.setMat4("projection", _mainCamera.perspectiveView);
 				}
@@ -589,14 +606,11 @@ void drawObjStencil(Object* obj) {
 								shader.setMat4("view", _identityMatrix);
 				}
 
-				glBindVertexArray(VAO);
 				glBindBuffer(GL_ARRAY_BUFFER, *obj->mesh->VBO);
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *obj->mesh->EBO);
 
-				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 				glEnableVertexAttribArray(0);
-				glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-				glEnableVertexAttribArray(1);
 
 				glDrawElements(GL_TRIANGLES, *obj->mesh->triCount * 3, GL_UNSIGNED_INT, 0);
 

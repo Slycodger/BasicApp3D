@@ -132,6 +132,16 @@ struct Vec3 {
         return sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
     }
 
+				static Vec3 cross(Vec3 a, Vec3 b) {
+								Vec3 ret;
+
+								ret.x = (a.y * b.z) - (b.y * a.z);
+								ret.y = -(a.x * b.z) + (b.x * a.z);
+								ret.z = (a.x * b.y) - (b.x * a.y);
+
+								return ret;
+				}
+
     Vec3& operator -=(const float val) {
         this->x -= val;
         this->y -= val;

@@ -11,115 +11,122 @@ iVec2 _windowPos = iVec2(0);
 iVec2 _realMousePos = iVec2(0);
 
 bool _windowScaled = false;
-bool _lockMouse = false;
 
 float _mousePosX = 0;
 float _mousePosY = 0;
+float _pMousePosX = 0;
+float _pMousePosY = 0;
 
 extern Camera _mainCamera;
 
+bool _lockMouse;
 
 //Local globals
 
 
 void start() {
-	for (uint i = 0; i < _MAX_OBJECTS; i++) {
-		globalObjects[i] = nullptr;
-	}
+				for (uint i = 0; i < _MAX_OBJECTS; i++) {
+								globalObjects[i] = nullptr;
+				}
 
-    Objects::start();
-    Text::start();
-    ProgUI::start();
-    Sound::start();
+				Objects::start();
+				Text::start();
+				ProgUI::start();
+				Sound::start();
+
+				ModelLoading::start("./Models/cube.obj");
 
 
-	addShader("noTextureShader", "./shaders/NTVertexShader.vert", "./shaders/NTFragmentShader.frag");
-	addShader("textureShader", "./shaders/TVertexShader.vert", "./shaders/TFragmentShader.frag");
+				addShader("noTextureShader", "./shaders/NTVertexShader.vert", "./shaders/NTFragmentShader.frag");
+				addShader("textureShader", "./shaders/TVertexShader.vert", "./shaders/TFragmentShader.frag");
 
-    stbi_set_flip_vertically_on_load(true);
+				stbi_set_flip_vertically_on_load(true);
 
-	progStart();
+				progStart();
 }
 
 void update() {
-    Sound::update();
+				Sound::update();
 
-    progUpdate();
-    ProgUI::update();
+				progUpdate();
+				ProgUI::update();
 
-	glClearColor(_bgColor.x, _bgColor.y, _bgColor.z, _bgColor.w);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				glClearColor(_bgColor.x, _bgColor.y, _bgColor.z, _bgColor.w);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-    drawAllObjs();
-	_windowScaled = false;
+				drawAllObjs();
+				_windowScaled = false;
 
-	giveKeyAction::latchSet();
+				giveKeyAction::latchSet();
 }
 
 void end() {
-	progEnd();
-	deleteAll();
+				progEnd();
+				deleteAll();
 
-	Text::end();
-	Objects::end();
-	Shaders::end();
-    Sound::end();
+				Text::end();
+				Objects::end();
+				Shaders::end();
+				Sound::end();
 }
 
 
 //-------------------Functions
 
 void setBgColor(Vec4 color) {
-	_bgColor = color;
+				_bgColor = color;
 }
 void setBgColor(float r, float g, float b, float a) {
-	_bgColor = Vec4(r, g, b, a);
+				_bgColor = Vec4(r, g, b, a);
 }
 
 
 //-------------------CALLBACKS
 
 void windowScaleCallback(GLFWwindow* window, int width, int height) {
-	_Width = width;
-	_Height = height;
-	_screenRatio = (float)_Width / _Height;
-	glViewport(0, 0, width, height);
-	_windowScaled = true;
-    _mainCamera.setOrthographicView(_screenRatio, 1, 1);
-    _mainCamera.setPerspectiveView(_mainCamera.FOV, _screenRatio, _mainCamera.nearClip, _mainCamera.farClip);
+				_screenWidth = width;
+				_screenHeight = height;
+				_screenRatio = (float)_screenWidth / _screenHeight;
+				glViewport(0, 0, width, height);
+				_windowScaled = true;
+				_mainCamera.setOrthographicView(_screenRatio, 1, 1);
+				_mainCamera.setPerspectiveView(_mainCamera.FOV, _screenRatio, _mainCamera.nearClip, _mainCamera.farClip);
 }
 void windowMoveCallback(GLFWwindow* window, int xpos, int ypos) {
-	_windowPos.x = xpos;
-	_windowPos.y = ypos;
+				_windowPos.x = xpos;
+				_windowPos.y = ypos;
 }
 void mouseMoveCallback(GLFWwindow* window, double xpos, double ypos) {
-	if (_lockMouse) {
-		SetCursorPos(_windowPos.x + _realMousePos.x, _windowPos.y + _realMousePos.y);
-		return;
-	}
+				if (_lockMouse) {
+								SetCursorPos(_windowPos.x + _realMousePos.x, _windowPos.y + _realMousePos.y);
+								return;
+				}
 
-	_realMousePos = { xpos, ypos };
-	_mousePosX = xpos / _Height * 2 - _screenRatio;
-	_mousePosY = (_Height - ypos) / _Height * 2 - 1;
+				_pMousePosX = _mousePosX;
+				_pMousePosY = _mousePosY;
+
+				_realMousePos = { xpos, ypos };
+				_mousePosX = xpos / _screenHeight * 2 - _screenRatio;
+				_mousePosY = (_screenHeight - ypos) / _screenHeight * 2 - 1;
 }
 void keyPressCallback(GLFWwindow* window, int button, int scancode, int action, int mods) {
-	if (action == GLFW_PRESS)
-		giveKeyAction::keyPressed(button);
-	else if (action == GLFW_RELEASE)
-		giveKeyAction::keyReleased(button);
-	giveKeyAction::setNumlock(mods & GLFW_MOD_NUM_LOCK);
-	giveKeyAction::setShift(mods & GLFW_MOD_SHIFT);
+				if (action == GLFW_PRESS)
+								giveKeyAction::keyPressed(button);
+				else if (action == GLFW_RELEASE)
+								giveKeyAction::keyReleased(button);
+				giveKeyAction::setNumlock(mods & GLFW_MOD_NUM_LOCK);
+				giveKeyAction::setShift(mods & GLFW_MOD_SHIFT);
 }
 void mouseScrollCallback(GLFWwindow* window, double xoff, double yoff) {
-	if (yoff > 0)
-		giveKeyAction::scrolledUp();
-	else if (yoff < 0)
-		giveKeyAction::scrolledDown();
+				if (yoff > 0)
+								giveKeyAction::scrolledUp();
+				else if (yoff < 0)
+								giveKeyAction::scrolledDown();
 }
 void mouseClickCallback(GLFWwindow* window, int button, int action, int mods) {
-	if (action == GLFW_PRESS)
-		giveKeyAction::keyPressed(button);
-	else if (action == GLFW_RELEASE)
-		giveKeyAction::keyReleased(button);
+				if (action == GLFW_PRESS)
+								giveKeyAction::keyPressed(button);
+				else if (action == GLFW_RELEASE)
+								giveKeyAction::keyReleased(button);
 }

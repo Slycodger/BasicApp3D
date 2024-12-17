@@ -34,4 +34,5 @@ void mouseScrollCallback(GLFWwindow* window, double xoff, double yoff);
 #include "progUI.h"
 #include "stb_image.h"
 #include "soundLoading.h"
+#include "modelLoading.h"
 #endif

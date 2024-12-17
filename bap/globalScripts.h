@@ -105,7 +105,7 @@ struct ButtonMain : public scriptBase {
 								started = true;
 
 								thisObj = (Object*)vThisObj;
-								thisObj->UI = true;
+								thisObj->ui = true;
 
 								textScr = new TextBox();
 
@@ -116,7 +116,7 @@ struct ButtonMain : public scriptBase {
 								textScr->lineSize = 0.55;
 								textScr->mode = TEXT_CENTER_RENDER;
 								textScr->fontColor = Vec4(0, 0, 0, 1);
-								textObj->UI = true;
+								textObj->ui = true;
 
 								textObj->transform = thisObj->transform;
 								textObj->setParent(thisObj);
@@ -204,7 +204,7 @@ struct Button : public scriptBase {
 								started = true;
 
 								thisObj = (Object*)vThisObj;
-								thisObj->UI = true;
+								thisObj->ui = true;
 
 								textScr = new TextBox();
 
@@ -215,7 +215,7 @@ struct Button : public scriptBase {
 								textScr->lineSize = 0.55;
 								textScr->mode = TEXT_CENTER_RENDER;
 								textScr->fontColor = Vec4(0, 0, 0, 1);
-								textObj->UI = true;
+								textObj->ui = true;
 
 								textObj->transform = thisObj->transform;
 								textObj->setParent(thisObj);
@@ -303,7 +303,7 @@ struct VoidButton : public scriptBase {
 								started = true;
 
 								thisObj = (Object*)vThisObj;
-								thisObj->UI = true;
+								thisObj->ui = true;
 
 								textScr = new TextBox();
 
@@ -314,7 +314,7 @@ struct VoidButton : public scriptBase {
 								textScr->lineSize = 0.55;
 								textScr->mode = TEXT_CENTER_RENDER;
 								textScr->fontColor = Vec4(0, 0, 0, 1);
-								textObj->UI = true;
+								textObj->ui = true;
 
 								textObj->transform = thisObj->transform;
 								textObj->setParent(thisObj);
@@ -491,7 +491,7 @@ struct DropDownFieldDynamic : public ButtonMain {
 								background->color = Vec4{ 0.4, 0.7, 0.7, 1 };
 								background->setParent(thisObj);
 								background->relativeTransform.position.z = 0.05f;
-								background->UI = true;
+								background->ui = true;
 								background->setToRelative();
 								onPressed();
 				}
@@ -523,7 +523,7 @@ struct DropDownFieldDynamic : public ButtonMain {
 								Object* newOption = createObj("square");
 								VoidButton* newScr = new VoidButton;
 
-								newOption->UI = true;
+								newOption->ui = true;
 
 								void dynamicDropDownFunction(void*);
 								newScr->onPressed = dynamicDropDownFunction;
@@ -617,7 +617,7 @@ struct DropDownFieldStatic : public ButtonMain {
 								background->setParent(thisObj);
 								background->setToRelative();
 								background->color = Vec4{ 0.7, 0.7, 0.7, 1 };
-								background->UI = true;
+								background->ui = true;
 
 								onPressed();
 				}
@@ -664,7 +664,7 @@ struct DropDownFieldStatic : public ButtonMain {
 								*newScr->textScr = buttonText;
 								newScr->textScr->text = option;
 								newScr->textScr->textUpdate();
-								newOption->UI = true;
+								newOption->ui = true;
 
 								optionObjs.push_back(newOption);
 				}

@@ -64,6 +64,13 @@
       <Filter>appFiles\Dependencies</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="bap\modelLoading.cpp">
+      <Filter>appFiles\Scripts Files</Filter>
+    </ClCompile>
+    <ClCompile Include="bap\shapes.cpp">
+      <Filter>appFiles\Scripts Files</Filter>
+    </ClCompile>
+    <ClCompile Include="bap\progBoiler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\NTVertexShader.vert">
@@ -100,6 +107,12 @@
       <Filter>appFiles</Filter>
     </None>
     <None Include="sfml-system-2.dll">
+      <Filter>appFiles</Filter>
+    </None>
+    <None Include="assimp-vc143-mt.dll">
+      <Filter>appFiles</Filter>
+    </None>
+    <None Include="freetype.dll">
       <Filter>appFiles</Filter>
     </None>
   </ItemGroup>
@@ -164,6 +177,10 @@
     <ClInclude Include="Dependencies\freeTypeInclude\ft2build.h">
       <Filter>appFiles\Dependencies</Filter>
     </ClInclude>
+    <ClInclude Include="bap\modelLoading.h">
+      <Filter>appFiles\include files</Filter>
+    </ClInclude>
+    <ClInclude Include="bap\progBoiler.h" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="fonts\Arial.ttf">

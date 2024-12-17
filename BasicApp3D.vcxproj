@@ -71,7 +71,9 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)..\Builds\BasicApp3dBuilds</OutDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -106,7 +108,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\glad\include;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies;$(SolutionDir)Dependencies\glfw-3.4.bin.WIN64\include;$(SolutionDir)Dependencies\freeTypeInclude;$(SolutionDir)Dependencies\stb;$(SolutionDir)Dependencies\sfml\include;$(SolutionDir)bap</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\glad\include;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies;$(SolutionDir)Dependencies\glfw-3.4.bin.WIN64\include;$(SolutionDir)Dependencies\freeTypeInclude;$(SolutionDir)Dependencies\stb;$(SolutionDir)Dependencies\sfml\include;$(SolutionDir)bap;$(SolutionDir)Dependencies\assimpInclude</AdditionalIncludeDirectories>
       <AdditionalUsingDirectories>$(SolutionDir)\glad\src;%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <Optimization>Disabled</Optimization>
@@ -115,8 +117,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\lib-vc2022;$(SolutionDir)Dependencies;$(SolutionDir)Dependencies\freeTypeDLL;$(SolutionDir)Dependencies\sfml\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;freetype.lib;sfml-audio-d.lib;sfml-system-d.lib;openal32.lib;flac.lib;vorbisenc.lib;vorbisfile.lib;vorbis.lib;ogg.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\lib-vc2022;$(SolutionDir)Dependencies;$(SolutionDir)Dependencies\freeTypeDLL;$(SolutionDir)Dependencies\assimp;$(SolutionDir)Dependencies\sfml\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;freetype.lib;assimp-vc143-mt.lib;sfml-audio-d.lib;sfml-system-d.lib;openal32.lib;flac.lib;vorbisenc.lib;vorbisfile.lib;vorbis.lib;ogg.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -127,7 +129,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\glad\include;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies;$(SolutionDir)Dependencies\glfw-3.4.bin.WIN64\include;$(SolutionDir)Dependencies\freeTypeInclude;$(SolutionDir)Dependencies\stb;$(SolutionDir)Dependencies\sfml\include;$(SolutionDir)bap</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\glad\include;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies;$(SolutionDir)Dependencies\glfw-3.4.bin.WIN64\include;$(SolutionDir)Dependencies\freeTypeInclude;$(SolutionDir)Dependencies\stb;$(SolutionDir)Dependencies\sfml\include;$(SolutionDir)bap;$(SolutionDir)Dependencies\assimpInclude</AdditionalIncludeDirectories>
       <AdditionalUsingDirectories>$(SolutionDir)\glad\src;%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
@@ -136,8 +138,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;freetype.lib;sfml-audio.lib;sfml-system.lib;openal32.lib;flac.lib;vorbisenc.lib;vorbisfile.lib;vorbis.lib;ogg.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\lib-vc2022;$(SolutionDir)Dependencies;$(SolutionDir)Dependencies\freeTypeDLL;$(SolutionDir)Dependencies\sfml\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;freetype.lib;assimp-vc143-mt.lib;sfml-audio.lib;sfml-system.lib;openal32.lib;flac.lib;vorbisenc.lib;vorbisfile.lib;vorbis.lib;ogg.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\lib-vc2022;$(SolutionDir)Dependencies;$(SolutionDir)Dependencies\freeTypeDLL;$(SolutionDir)Dependencies\assimp;$(SolutionDir)Dependencies\sfml\lib</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -149,6 +151,7 @@ xcopy $(ProjectDir)freetype.dll $(OutDir) /y
 xcopy $(ProjectDir)fonts $(OutDir)fonts /y /i /e /s
 xcopy $(ProjectDir)textures $(OutDir)textures /y /i /e /s
 xcopy $(ProjectDir)sounds $(OutDir)sounds /y /i /e /s
+xcopy $(ProjectDir)models $(OutDir)models /y /i /e /s
 xcopy $(ProjectDir)*.dll $(OutDir) /y</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
@@ -157,9 +160,12 @@ xcopy $(ProjectDir)*.dll $(OutDir) /y</Command>
     <ClCompile Include="bap\globalScripts.cpp" />
     <ClCompile Include="bap\input.cpp" />
     <ClCompile Include="bap\IntializeShader.cpp" />
+    <ClCompile Include="bap\modelLoading.cpp" />
     <ClCompile Include="bap\objects.cpp" />
+    <ClCompile Include="bap\progBoiler.cpp" />
     <ClCompile Include="bap\programControl.cpp" />
     <ClCompile Include="bap\progUI.cpp" />
+    <ClCompile Include="bap\shapes.cpp" />
     <ClCompile Include="bap\sound.cpp" />
     <ClCompile Include="bap\text.cpp" />
     <ClCompile Include="bap\textureLoading.cpp" />
@@ -167,6 +173,8 @@ xcopy $(ProjectDir)*.dll $(OutDir) /y</Command>
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="assimp-vc143-mt.dll" />
+    <None Include="freetype.dll" />
     <None Include="LICENSE" />
     <None Include="openal32.dll" />
     <None Include="sfml-audio-2.dll" />
@@ -189,9 +197,11 @@ xcopy $(ProjectDir)*.dll $(OutDir) /y</Command>
     <ClInclude Include="bap\input.h" />
     <ClInclude Include="bap\intializeShader.h" />
     <ClInclude Include="bap\mathConstants.h" />
+    <ClInclude Include="bap\modelLoading.h" />
     <ClInclude Include="bap\objects.h" />
     <ClInclude Include="bap\objScripts.h" />
     <ClInclude Include="bap\openGL.h" />
+    <ClInclude Include="bap\progBoiler.h" />
     <ClInclude Include="bap\programControl.h" />
     <ClInclude Include="bap\progUI.h" />
     <ClInclude Include="bap\shapes.h" />

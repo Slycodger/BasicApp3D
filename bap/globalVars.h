@@ -5,10 +5,12 @@
 extern iVec2 _realMousePos;
 extern iVec2 _windowPos;
 extern Vec4 _bgColor;
-extern uint _Width;
-extern uint _Height;
+extern uint _screenWidth;
+extern uint _screenHeight;
 extern float _mousePosX;
 extern float _mousePosY;
+extern float _pMousePosX;
+extern float _pMousePosY;
 extern double _deltaTime;
 extern float _screenRatio;
 extern bool _windowScaled;

@@ -132,11 +132,11 @@ void renderTextBuffer(std::string font, std::string text, float fontSize, float 
 								w = curChar.size.x * fontSize;
 								h = curChar.size.y * fontSize;
 
-								float vertices[20] = {
-									x,		y + h,	0,			0, 0,
-									x + w,	y + h,	0,			1, 0,
-									x + w,	y,		0,			1, 1,
-									x,		y,		0,			0, 1
+								float vertices[32] = {
+									x,		y + h,	0,						1, 1, 1,			0, 0,
+									x + w,	y + h,	0,			1, 1, 1,			1, 0,
+									x + w,	y,		0,						1, 1, 1,			1, 1,
+									x,		y,		0,									1, 1, 1,			0, 1
 								};
 
 								glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
@@ -162,8 +162,8 @@ void renderTextBuffer(std::string font, std::string text, float fontSize, float 
 /// <param name="text">: Text that will be shown on texture</param>
 /// <returns>Text drawn to 'texture'</returns>
 void createTextTexture(uint& texture, float fontSize, float lineSize, Vec2 size, float yStart, float margin, uint mode, std::string font, std::string text) {
-				uint screenX = size.x * _Height;
-				uint screenY = size.y * _Height;
+				uint screenX = size.x * _screenHeight;
+				uint screenY = size.y * _screenHeight;
 				cChar curChar;
 				float ratio = size.x / size.y;
 
@@ -204,7 +204,6 @@ void createTextTexture(uint& texture, float fontSize, float lineSize, Vec2 size,
 				shader.active();
 				shader.setInt("texTarget", 0);
 				shader.setMat4("projection", ortho);
-				shader.setMat4("view", _identityMatrix);
 
 				glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 				glDeleteTextures(1, &texture);
@@ -382,7 +381,7 @@ void createTextTexture(uint& texture, float fontSize, float lineSize, Vec2 size,
 				glBindBuffer(GL_ARRAY_BUFFER, 0);
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 				glBindFramebuffer(GL_FRAMEBUFFER, 0);
-				glViewport(0, 0, _Width, _Height);
+				glViewport(0, 0, _screenWidth, _screenHeight);
 				glEnable(GL_STENCIL_TEST);
 				glEnable(GL_DEPTH_TEST);
 				glEnable(GL_BLEND);
@@ -404,16 +403,18 @@ namespace Text {
 
 								glGenBuffers(1, &VBO);
 								glBindBuffer(GL_ARRAY_BUFFER, VBO);
-								glBufferData(GL_ARRAY_BUFFER, sizeof(squareVertices), squareVertices, GL_STREAM_DRAW);
+								glBufferData(GL_ARRAY_BUFFER, squareVerticeSize, squareVertices, GL_DYNAMIC_DRAW);
 
 								glGenBuffers(1, &EBO);
 								glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-								glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(squareIndices), squareIndices, GL_STREAM_DRAW);
+								glBufferData(GL_ELEMENT_ARRAY_BUFFER, squareIndiceSize, squareIndices, GL_DYNAMIC_DRAW);
 
-								glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
+								glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 								glEnableVertexAttribArray(0);
-								glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+								glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
 								glEnableVertexAttribArray(1);
+								glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+								glEnableVertexAttribArray(2);
 
 								glBindVertexArray(0);
 								glBindBuffer(GL_ARRAY_BUFFER, 0);

@@ -23,16 +23,34 @@ namespace Objects {
 #include <limits>
 #include "shapes.h"
 #include "mathConstants.h"
+#include <span>
 
-struct Mesh {
+class Vertex {
+public:
+				Vec3 position;
+				Vec3 color;
+				Vec2 uv;
+
+				Vertex() : position(0), color(1), uv(0) {}
+				Vertex(Vec3 Pos, Vec3 C, Vec2 Uv) : position(Pos), color(C), uv(Uv) {}
+};
+
+class Mesh {
+public:
+				std::span<Vertex> vertices;
+				std::span<uint> indices;
 				uint* VBO = nullptr;
 				uint* EBO = nullptr;
 				uint* triCount = nullptr;
-				Mesh() : VBO(nullptr), EBO(nullptr), triCount(nullptr) {}
-				Mesh(uint* vbo, uint* ebo, uint* tCount) : VBO(vbo), EBO(ebo), triCount(tCount) {}
+
+
+				Mesh() : vertices(), indices(), VBO(nullptr), EBO(nullptr), triCount(nullptr) {}
+				Mesh(std::span<Vertex> verts, std::span<uint> tris) : vertices(verts), indices(tris), VBO(nullptr), EBO(nullptr), triCount(nullptr) {}
+				Mesh(std::span<Vertex> verts, std::span<uint> tris, uint* vbo, uint* ebo, uint* tCount) : vertices(verts), indices(tris), VBO(vbo), EBO(ebo), triCount(tCount) {}
 };
 
-struct Transform {
+class Transform {
+public:
 				Vec3 position = 0;
 				Vec3 scale = 1;
 				Vec3 rotation = 0;
@@ -40,7 +58,8 @@ struct Transform {
 				Transform() : position(0), scale(1), rotation(0) {}
 };
 
-struct Object {
+class Object {
+public:
 				Transform transform;
 				Transform relativeTransform;
 				std::set<Object*> children;
@@ -51,7 +70,7 @@ struct Object {
 				bool active = true;
 				std::string objType;
 				bool scriptCreated = false;
-				bool UI = false;
+				bool ui = false;
 				bool weak = false;
 				std::vector<void*> scripts;
 				Mesh* mesh = nullptr;
@@ -95,7 +114,7 @@ struct Object {
 
 				//-------------------Constructor
 				Object() : transform(), relativeTransform(), children(), dependencies(), parent(nullptr), color(1)
-								, active(true), scriptCreated(false), UI(false), scripts(), mesh(nullptr), index(-1),
+								, active(true), scriptCreated(false), ui(false), scripts(), mesh(nullptr), index(-1),
 				directInstance(false), texture(nullptr)
 				{}
 
@@ -122,7 +141,7 @@ struct Object {
 
 								obj->children.insert(this);
 								parent = obj;
-								this->UI = parent->UI;
+								this->ui = parent->ui;
 								relativeTransform.position = (transform.position - parent->transform.position) / parent->transform.scale;
 								relativeTransform.scale = transform.scale / parent->transform.scale;
 								relativeTransform.rotation = transform.rotation - parent->transform.rotation;
@@ -132,7 +151,7 @@ struct Object {
 								if (parent == nullptr)
 												return;
 
-								this->UI = parent->UI;
+								this->ui = parent->ui;
 
 								glm::mat4 Translation(1);
 								Translation = glm::rotate(Translation, glm::radians<float>(parent->transform.rotation.x), glm::vec3(1, 0, 0));
@@ -186,9 +205,10 @@ struct Object {
 
 Object* createObj(std::string objName);
 bool unloadMesh(std::string name);
-bool loadMesh(std::string name, Mesh* mesh);
+bool loadMesh(Mesh* mesh, std::string name);
 void deleteObjMeshes();
-void createMeshBuffers(uint& VBO, uint& EBO, const float* vertices, const uint* indices, const size_t vertSize, const size_t indiceSize);
+void createMeshBuffers(uint& VBO, uint& EBO, float* vertices, uint* indices, size_t vertSize, size_t indiceSize);
+void createMeshBuffers(uint& VBO, uint& EBO, const float* vertices, const uint* indices, size_t vertSize, size_t indiceSize);
 void addObjScript(Object* obj, void* script);
 void removeObjScript(Object* obj, unsigned int index);
 unsigned int getObjScriptIndex(Object*& obj, std::string name);
@@ -208,7 +228,7 @@ Object* instantiateObj(std::string objName);
 bool saveObj(Object* obj, std::string objName);
 void addObjScript(Object* obj, void* script, char c);
 void deleteObj(Object*& obj, const char);
-void startObject(Object* obj);
+void startObj(Object* obj);
 void createScriptObjs(std::pair<std::vector<std::string>, std::vector<void*>&> pair);
 glm::mat4 createObjTransform(Object* obj);
 bool setObjMesh(Object* obj, std::string mesh);

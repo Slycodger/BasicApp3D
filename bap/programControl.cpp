@@ -3,13 +3,14 @@
 #include "Windows.h"
 #include <chrono>
 
-uint _Width = 1280;
-uint _Height = 720;
-float _screenRatio = (float)_Width / _Height;
+uint _screenWidth = 1280;
+uint _screenHeight = 720;
+float _screenRatio = (float)_screenWidth / _screenHeight;
 double _deltaTime = 0;
 bool _closeApp = false;
 bool _hideMouse = false;
 bool _vsync = false;
+bool _zeroMouse = false;
 std::string _windowTitle = "My window";
 
 int main() {
@@ -18,7 +19,7 @@ int main() {
 								return 0;
 				}
 
-				GLFWwindow* mainWindow = glfwCreateWindow(_Width, _Height, "My window", nullptr, nullptr);
+				GLFWwindow* mainWindow = glfwCreateWindow(_screenWidth, _screenHeight, "My window", nullptr, nullptr);
 				if (!mainWindow) {
 								std::cout << "Failed to load window\n";
 								return 0;
@@ -47,16 +48,16 @@ int main() {
 				size_t delay = 0;
 				while (!glfwWindowShouldClose(mainWindow))
 				{
-								std::chrono::time_point i = std::chrono::high_resolution_clock().now();
-								glfwPollEvents();
-								update();
-								glfwSwapBuffers(mainWindow);
-
 								if (_hideMouse) {
 												glfwSetInputMode(mainWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 								}
 								else
 												glfwSetInputMode(mainWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
+								std::chrono::time_point i = std::chrono::high_resolution_clock().now();
+								glfwPollEvents();
+								update();
+								glfwSwapBuffers(mainWindow);
 
 								if (_closeApp)
 												glfwSetWindowShouldClose(mainWindow, 1);
